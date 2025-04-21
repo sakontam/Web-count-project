@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>เว็บง่ายๆที่คุณก็ทำได้</title>
-    <link rel="icon" href="G:\lab\Web-count\183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg" type="image/x-icon" />
+    <link rel="icon" href="183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg" type="image/x-icon" />
     <style>
       body,
       html {
@@ -85,7 +85,7 @@
       // ตรวจสอบว่าการโหลดนี้เป็นการรีเฟรชหรือไม่
       if (performance.navigation.type !== 1) {
         // โหลด count ปกติถ้าไม่ได้รี
-        fetch("http://127.0.0.1:5000/count", {
+        fetch("https://web-count-project.onrender.com/count", {
           method: "GET",
           credentials: "include",
         })
