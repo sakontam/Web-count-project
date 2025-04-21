@@ -42,13 +42,12 @@
       timestamps = timestamps.filter((ts) => now - ts <= 5000);
       localStorage.setItem("refreshTimestamps", JSON.stringify(timestamps));
 
-      // ถ้ารีเกิน 2 ครั้งใน 5 วินาที → ปิดเว็บ
+      // ถ้ารีเกิน 5 ครั้งใน 5 วินาที → ปิดเว็บ
       if (timestamps.length >= 5) {
-        alert("บอกอยู่ไม่ให้รีดื้อดีนัก");
+        alert("ได้");
         window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
       }
-
-      document.getElementById("counter").textContent = "ไม่ให้รีจ้า";
+      document.getElementById("counter").textContent = "ไม่ให้รีหน้าจอจ้า";
     }
 
     // ดักการกด F5 / Ctrl+R และการปัดหน้าจอ
@@ -57,6 +56,10 @@
         e.preventDefault();
         document.getElementById("counter").textContent = "ไม่ให้กด F5 นะจ๊ะ";
       } else if (e.ctrlKey && e.key === "r") {
+        e.preventDefault();
+        document.getElementById("counter").textContent =
+          "ไม่ให้กด CTRL+R นะจ๊ะ";
+      } else if (e.ctrlKey && e.key === "พ") {
         e.preventDefault();
         document.getElementById("counter").textContent =
           "ไม่ให้กด CTRL+R นะจ๊ะ";
