@@ -10,6 +10,7 @@
     />
   </head>
   <body>
+    <audio id="bg-music" src="C418 - Minecraft - Minecraft Volume Alpha.mp3" autoplay loop></audio>
     <div>
       <h1>คุณเป็นคนที่</h1>
       <h2 id="counter">กำลังโหลด...</h2>
@@ -31,18 +32,12 @@
       refreshCount += 1;
       localStorage.setItem("refreshCount", refreshCount);
 
-      // เพิ่ม timestamp ของการรีเฟรช
-      let timestamps = JSON.parse(
-        localStorage.getItem("refreshTimestamps") || "[]"
-      );
+      let timestamps = JSON.parse(localStorage.getItem("refreshTimestamps") || "[]");
       const now = Date.now();
       timestamps.push(now);
-
-      // เก็บแค่ 1 วินาทีล่าสุด
       timestamps = timestamps.filter((ts) => now - ts <= 5000);
       localStorage.setItem("refreshTimestamps", JSON.stringify(timestamps));
 
-      // ถ้ารีเกิน 5 ครั้งใน 5 วินาที → ปิดเว็บ
       if (timestamps.length >= 5) {
         alert("ได้");
         window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
@@ -50,23 +45,18 @@
       document.getElementById("counter").textContent = "ไม่ให้รีหน้าจอจ้า";
     }
 
-    // ดักการกด F5 / Ctrl+R และการปัดหน้าจอ
+    // ดักการกด F5 / Ctrl+R
     window.addEventListener("keydown", function (e) {
       if (e.key === "F5") {
         e.preventDefault();
         document.getElementById("counter").textContent = "ไม่ให้กด F5 นะจ๊ะ";
-      } else if (e.ctrlKey && e.key === "r") {
+      } else if ((e.ctrlKey && e.key === "r") || (e.ctrlKey && e.key === "พ")) {
         e.preventDefault();
-        document.getElementById("counter").textContent =
-          "ไม่ให้กด CTRL+R นะจ๊ะ";
-      } else if (e.ctrlKey && e.key === "พ") {
-        e.preventDefault();
-        document.getElementById("counter").textContent =
-          "ไม่ให้กด CTRL+R นะจ๊ะ";
+        document.getElementById("counter").textContent = "ไม่ให้กด CTRL+R นะจ๊ะ";
       }
     });
 
-    // ป้องกันการรีเฟรชจากการปัดลงในมือถือ
+    // ป้องกันการรีเฟรชจากมือถือ
     window.addEventListener("beforeunload", function (e) {
       e.preventDefault();
       e.returnValue = "";
@@ -82,10 +72,13 @@
         .then((data) => {
           document.getElementById("counter").textContent = data.count;
         });
-    } else {
-      // ถ้าเป็นการรีโหลด ก็ไม่ให้เรียก fetch
-      console.log("ไม่เรียก fetch เพราะเป็นการรีเฟรช");
     }
+    window.addEventListener("click", function () {
+      const audio = document.getElementById("bg-music");
+      if (audio.paused) {
+        audio.play();
+      }
+    });
   </script>
   <style>
     html {
@@ -121,6 +114,21 @@
       background-color: rgba(0, 0, 0, 0.6);
       padding: 10px;
       border-radius: 10px;
+    }
+
+    #music-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 999;
     }
   </style>
 </html>
