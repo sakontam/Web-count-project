@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <title>เว็บง่ายๆที่คุณก็ทำได้</title>
-    <link rel="icon" href="183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg" type="image/x-icon" />
+    <link
+      rel="icon"
+      href="183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg"
+      type="image/x-icon"
+    />
     <style>
       body,
       html {
@@ -64,8 +68,7 @@
           window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
         }
 
-        document.getElementById("counter").textContent =
-          refreshCount > 10 ? "พอได้แล้ว" : "ไม่ให้รีตรงนั้นด้วยจ้า";
+        document.getElementById("counter").textContent = "ไม่ให้รีจ้า";
       }
 
       // ดักการกด F5 / Ctrl+R และการปัดหน้าจอ
@@ -73,13 +76,12 @@
         if (e.key === "F5") {
           e.preventDefault();
           document.getElementById("counter").textContent = "ไม่ให้กด F5 นะจ๊ะ";
-        }
-        else if (e.ctrlKey && e.key === "r") {
+        } else if (e.ctrlKey && e.key === "r") {
           e.preventDefault();
-          document.getElementById("counter").textContent = "ไม่ให้กด CTRL+R นะจ๊ะ";
+          document.getElementById("counter").textContent =
+            "ไม่ให้กด CTRL+R นะจ๊ะ";
         }
       });
-      
 
       window.addEventListener("beforeunload", function (e) {
         // ป้องกันการรีเฟรชจากการปัดลงในมือถือ
