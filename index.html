@@ -29,7 +29,23 @@
     </div>
 
     <script>
-      fetch("https://web-count-project.onrender.com/count", {
+      // ดักการกด F5 หรือ Ctrl+R แล้วขึ้นว่า "ไม่ให้กด!"
+      window.addEventListener("keydown", function (e) {
+        if ((e.key === "F5") || (e.ctrlKey && e.key === "r")) {
+          e.preventDefault();
+          document.getElementById("counter").textContent = "ไม่ให้กดรีนะจ๊ะ";
+        }
+      });
+    
+      // ดักการรีเฟรชจากปุ่มรีเฟรช หรือรีเฟรชแบบอื่น
+      window.addEventListener("beforeunload", function (e) {
+        e.preventDefault();
+        e.returnValue = ""; 
+        return "";
+      });
+    
+      // โหลดค่า count ตามปกติ (จะไม่ถึงตรงนี้ถ้าโดนบล็อกก่อน)
+      fetch("http://127.0.0.1:5000/count", {
         method: "GET",
         credentials: "include",
       })
@@ -38,5 +54,6 @@
           document.getElementById("counter").textContent = data.count;
         });
     </script>
+    
   </body>
 </html>
