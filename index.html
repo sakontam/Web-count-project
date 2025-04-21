@@ -60,7 +60,7 @@
 
         // ถ้ารีเกิน 2 ครั้งใน 5 วินาที → ปิดเว็บ
         if (timestamps.length >= 5) {
-          alert("กดบ่อยไปละ! บ๊ายบายจ้า 👋");
+          alert("บอกอยู่ไม่ให้รีดื้อดีนัก");
           window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
         }
 
@@ -70,11 +70,16 @@
 
       // ดักการกด F5 / Ctrl+R และการปัดหน้าจอ
       window.addEventListener("keydown", function (e) {
-        if (e.key === "F5" || (e.ctrlKey && e.key === "r")) {
+        if (e.key === "F5") {
           e.preventDefault();
-          document.getElementById("counter").textContent = "ไม่ให้กดรีนะจ๊ะ";
+          document.getElementById("counter").textContent = "ไม่ให้กด F5 นะจ๊ะ";
+        }
+        else if (e.ctrlKey && e.key === "r") {
+          e.preventDefault();
+          document.getElementById("counter").textContent = "ไม่ให้กด CTRL+R นะจ๊ะ";
         }
       });
+      
 
       window.addEventListener("beforeunload", function (e) {
         // ป้องกันการรีเฟรชจากการปัดลงในมือถือ
