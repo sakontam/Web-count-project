@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>เว็บง่ายๆที่คุณก็ทำได้</title>
+    <link rel="icon" href="G:\lab\Web-count\183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg" type="image/x-icon" />
     <style>
       body,
       html {
@@ -36,64 +37,66 @@
         localStorage.removeItem("refreshTimestamps");
       }
       sessionStorage.setItem("session_active", "true");
-    
+
       // ถ้าเป็นการรีโหลด
       if (performance.navigation.type === 1) {
-        let refreshCount = parseInt(localStorage.getItem("refreshCount") || "0");
+        let refreshCount = parseInt(
+          localStorage.getItem("refreshCount") || "0"
+        );
         refreshCount += 1;
         localStorage.setItem("refreshCount", refreshCount);
-    
+
         // เพิ่ม timestamp ของการรีเฟรช
-        let timestamps = JSON.parse(localStorage.getItem("refreshTimestamps") || "[]");
+        let timestamps = JSON.parse(
+          localStorage.getItem("refreshTimestamps") || "[]"
+        );
         const now = Date.now();
         timestamps.push(now);
-    
+
         // เก็บแค่ 1 วินาทีล่าสุด
         timestamps = timestamps.filter((ts) => now - ts <= 5000);
         localStorage.setItem("refreshTimestamps", JSON.stringify(timestamps));
-    
+
         // ถ้ารีเกิน 2 ครั้งใน 5 วินาที → ปิดเว็บ
         if (timestamps.length >= 2) {
           alert("กดบ่อยไปละ! บ๊ายบายจ้า 👋");
           window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
         }
-    
+
         document.getElementById("counter").textContent =
-          refreshCount > 40 ? "พอได้แล้ว" : `รีไปแล้ว ${refreshCount} ครั้ง`;
+          refreshCount > 10 ? "พอได้แล้ว" : `รีไปแล้ว ${refreshCount} ครั้ง`;
       }
-    
-      // โหลด count ปกติถ้าไม่ได้รี
-      fetch("https://web-count-project.onrender.com/count", {
-        method: "GET",
-        credentials: "include",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (performance.navigation.type !== 1) {
-            document.getElementById("counter").textContent = data.count;
-          }
-        });
-    
-      // ดักการกด F5 / Ctrl+R
+
+      // ดักการกด F5 / Ctrl+R และการปัดหน้าจอ
       window.addEventListener("keydown", function (e) {
-        if ((e.key === "F5")) {
+        if (e.key === "F5" || (e.ctrlKey && e.key === "r")) {
           e.preventDefault();
-          document.getElementById("counter").textContent = "ไม่ให้กด F5 นะจ๊ะ";
+          document.getElementById("counter").textContent = "ไม่ให้กดรีนะจ๊ะ";
         }
       });
 
-      window.addEventListener("keydown", function (e) {
-        if ((e.ctrlKey && e.key === "r")) {
-          e.preventDefault();
-          document.getElementById("counter").textContent = "ไม่ให้กด CTRL+R นะจ๊ะ";
-        }
-      });
-    
-      // ก่อนปิดหน้า
       window.addEventListener("beforeunload", function (e) {
+        // ป้องกันการรีเฟรชจากการปัดลงในมือถือ
         e.preventDefault();
-        e.returnValue = "";
+        e.returnValue = ""; // บางเบราว์เซอร์อาจต้องการข้อความใน returnValue
+        return ""; // ในกรณีของบางเบราว์เซอร์ให้ return ค่านี้
       });
-    </script>       
+
+      // ตรวจสอบว่าการโหลดนี้เป็นการรีเฟรชหรือไม่
+      if (performance.navigation.type !== 1) {
+        // โหลด count ปกติถ้าไม่ได้รี
+        fetch("http://127.0.0.1:5000/count", {
+          method: "GET",
+          credentials: "include",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("counter").textContent = data.count;
+          });
+      } else {
+        // ถ้าเป็นการรีโหลด ก็ไม่ให้เรียก fetch
+        console.log("ไม่เรียก fetch เพราะเป็นการรีเฟรช");
+      }
+    </script>
   </body>
 </html>
