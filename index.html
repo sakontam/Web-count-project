@@ -52,10 +52,10 @@
         timestamps = timestamps.filter((ts) => now - ts <= 5000);
         localStorage.setItem("refreshTimestamps", JSON.stringify(timestamps));
     
-        // ถ้ารีเกิน 5 ครั้งใน 1 วินาที → ปิดเว็บ
+        // ถ้ารีเกิน 2 ครั้งใน 5 วินาที → ปิดเว็บ
         if (timestamps.length >= 2) {
           alert("กดบ่อยไปละ! บ๊ายบายจ้า 👋");
-          window.close(); 
+          window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
         }
     
         document.getElementById("counter").textContent =
