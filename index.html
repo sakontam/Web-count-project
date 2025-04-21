@@ -1,5 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>เว็บง่ายๆที่คุณก็ทำได้</title>
+    <link
+      rel="icon"
+      href="183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg"
+      type="image/x-icon"
+    />
+  </head>
+  <body>
+    <div>
+      <h1>คุณเป็นคนที่</h1>
+      <h2 id="counter">กำลังโหลด...</h2>
+      <h3>ไม่มีอะไรให้หรอก</h3>
+      <h3>แค่อยากรู้จะมีคนสแกนกี่คน</h3>
+    </div>
+  </body>
   <script>
     // เคลียร์ localStorage ถ้าเป็น session ใหม่
     if (!sessionStorage.getItem("session_active")) {
@@ -46,16 +63,14 @@
       }
     });
 
+    // ป้องกันการรีเฟรชจากการปัดลงในมือถือ
     window.addEventListener("beforeunload", function (e) {
-      // ป้องกันการรีเฟรชจากการปัดลงในมือถือ
       e.preventDefault();
-      e.returnValue = ""; // บางเบราว์เซอร์อาจต้องการข้อความใน returnValue
-      return ""; // ในกรณีของบางเบราว์เซอร์ให้ return ค่านี้
+      e.returnValue = "";
+      return "";
     });
 
-    // ตรวจสอบว่าการโหลดนี้เป็นการรีเฟรชหรือไม่
     if (performance.navigation.type !== 1) {
-      // โหลด count ปกติถ้าไม่ได้รี
       fetch("https://web-count-project.onrender.com/count", {
         method: "GET",
         credentials: "include",
@@ -69,23 +84,6 @@
       console.log("ไม่เรียก fetch เพราะเป็นการรีเฟรช");
     }
   </script>
-  <head>
-    <meta charset="UTF-8" />
-    <title>เว็บง่ายๆที่คุณก็ทำได้</title>
-    <link
-      rel="icon"
-      href="183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg"
-      type="image/x-icon"
-    />
-  </head>
-  <body>
-    <div>
-      <h1>คุณเป็นคนที่</h1>
-      <h2 id="counter">กำลังโหลด...</h2>
-      <h3>ไม่มีอะไรให้หรอก</h3>
-      <h3>แค่อยากรู้จะมีคนสแกนกี่คน</h3>
-    </div>
-  </body>
   <style>
     html {
       height: 100%;
@@ -94,10 +92,9 @@
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-      background-image: url("Minecraft_2024.10.28-22.45.png"); /* เปลี่ยน URL เป็นภาพของคุณ */
-      background-size: cover; /* ขยายภาพให้เต็มหน้าจอ */
-      background-position: center; /* จัดตำแหน่งภาพให้ตรงกลาง */
-      background-repeat: no-repeat; /* ไม่ให้ภาพซ้ำ */
+      background-image: url("Minecraft_2024.10.28-22.45.png");
+      background-size: cover;
+      background-position: center;
     }
 
     h1,
