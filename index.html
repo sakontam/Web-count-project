@@ -5,12 +5,12 @@
     <title>เว็บง่ายๆที่คุณก็ทำได้</title>
     <link
       rel="icon"
-      href="183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg"
+      href="assets/183dcbf6-fd89-4138-86ee-17e3e153fbf7.jpg"
       type="image/x-icon"
     />
   </head>
   <body>
-    <audio id="bg-music" src="C418 - Minecraft - Minecraft Volume Alpha.mp3" autoplay loop></audio>
+    <audio id="bg-music" src="assets/C418 - Minecraft - Minecraft Volume Alpha.mp3" autoplay loop></audio>
     <div>
       <h1>คุณเป็นคนที่</h1>
       <h2 id="counter">กำลังโหลด...</h2>
@@ -27,7 +27,7 @@
     sessionStorage.setItem("session_active", "true");
 
     // ถ้าเป็นการรีโหลด
-    if (performance.navigation.type === 1) {
+    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
       let refreshCount = parseInt(localStorage.getItem("refreshCount") || "0");
       refreshCount += 1;
       localStorage.setItem("refreshCount", refreshCount);
@@ -88,7 +88,7 @@
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-      background-image: url("Minecraft_2024.10.28-22.45.png");
+      background-image: url("assets/Minecraft_2024.10.28-22.45.png");
       background-size: cover;
       background-position: center;
     }
