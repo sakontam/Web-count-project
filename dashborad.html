@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+      }
+
+      .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+      }
+
+      .visitor-info {
+        width: 300px;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-right: 20px;
+        flex-shrink: 0;
+      }
+
+      h1 {
+        color: #333;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        text-align: center;
+        width: 100%;
+      }
+
+      .count-box {
+        font-size: 1.5em;
+        color: #555;
+        background-color: #f0f8ff;
+        border: 2px solid #1e90ff;
+        padding: 15px 20px;
+        border-radius: 8px;
+        display: inline-block;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .chart-container {
+        width: calc(100% - 340px); /* ทำให้กราฟขยายเต็มที่ */
+        height: 100%;
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="visitor-info">
+        <h2>จำนวนผู้เข้าชมทั้งหมด</h2>
+        <div id="visitorCount" class="count-box">Loading...</div>
+      </div>
+      <div class="chart-container">
+        <canvas id="visitorChart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      // ดึงข้อมูลจำนวนผู้เข้าชมทั้งหมด
+      fetch("http://127.0.0.1:5000/count", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          document.getElementById(
+            "visitorCount"
+          ).textContent = `จำนวนผู้เข้าชม: ${data.count}`;
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+          document.getElementById("visitorCount").textContent =
+            "ไม่สามารถโหลดข้อมูลได้";
+        });
+
+      // ฟังก์ชันเพื่อดึงข้อมูลจำนวนผู้เข้าชมทั้งหมดจาก API
+      fetch("http://127.0.0.1:5000/visitor_data", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const ctx = document.getElementById("visitorChart").getContext("2d");
+
+          // สร้างกราฟ
+          new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: data.dates,
+              datasets: [
+                {
+                  label: "จำนวนผู้เข้าชม",
+                  data: data.counts,
+                  borderColor: "#1e90ff",
+                  backgroundColor: "rgba(30, 144, 255, 0.2)",
+                  fill: true,
+                  tension: 0.4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (tooltipItem) {
+                      return `จำนวนผู้เข้าชม: ${tooltipItem.raw}`;
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: "วันที่",
+                  },
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: "จำนวนผู้เข้าชม",
+                  },
+                  ticks: {
+                    // กำหนดให้แสดงตัวเลขที่เป็นค่าตัวเลขธรรมดา
+                    beginAtZero: true, // เริ่มจาก 0
+                    stepSize: 1, // กำหนดระยะห่างระหว่างตัวเลขในแกน Y
+                    callback: function (value) {
+                      return value; // แสดงผลตัวเลขธรรมดา
+                    },
+                  },
+                },
+              },
+            },
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    </script>
+  </body>
+</html>

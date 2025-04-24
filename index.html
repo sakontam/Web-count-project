@@ -10,7 +10,12 @@
     />
   </head>
   <body>
-    <audio id="bg-music" src="assets/C418 - Minecraft - Minecraft Volume Alpha.mp3" autoplay loop></audio>
+    <audio
+      id="bg-music"
+      src="assets/C418 - Minecraft - Minecraft Volume Alpha.mp3"
+      autoplay
+      loop
+    ></audio>
     <div>
       <h1>คุณเป็นคนที่</h1>
       <h2 id="counter">กำลังโหลด...</h2>
@@ -19,6 +24,10 @@
     </div>
   </body>
   <script>
+    // 👇 เพิ่มตรงนี้: สร้าง UUID และเก็บไว้ใน localStorage
+    const uuid = localStorage.getItem("uuid") || crypto.randomUUID();
+    localStorage.setItem("uuid", uuid);
+
     // เคลียร์ localStorage ถ้าเป็น session ใหม่
     if (!sessionStorage.getItem("session_active")) {
       localStorage.removeItem("refreshCount");
@@ -26,13 +35,19 @@
     }
     sessionStorage.setItem("session_active", "true");
 
+    // --- Detect Navigation Type ---
+    const navEntry = performance.getEntriesByType("navigation")[0];
+    const navType = navEntry?.type || "navigate";
+
     // ถ้าเป็นการรีโหลด
     if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
       let refreshCount = parseInt(localStorage.getItem("refreshCount") || "0");
       refreshCount += 1;
       localStorage.setItem("refreshCount", refreshCount);
 
-      let timestamps = JSON.parse(localStorage.getItem("refreshTimestamps") || "[]");
+      let timestamps = JSON.parse(
+        localStorage.getItem("refreshTimestamps") || "[]"
+      );
       const now = Date.now();
       timestamps.push(now);
       timestamps = timestamps.filter((ts) => now - ts <= 5000);
@@ -52,7 +67,8 @@
         document.getElementById("counter").textContent = "ไม่ให้กด F5 นะจ๊ะ";
       } else if ((e.ctrlKey && e.key === "r") || (e.ctrlKey && e.key === "พ")) {
         e.preventDefault();
-        document.getElementById("counter").textContent = "ไม่ให้กด CTRL+R นะจ๊ะ";
+        document.getElementById("counter").textContent =
+          "ไม่ให้กด CTRL+R นะจ๊ะ";
       }
     });
 
@@ -63,16 +79,25 @@
       return "";
     });
 
-    if (performance.navigation.type !== 1) {
-      fetch("https://web-count-project.onrender.com/count", {
-        method: "GET",
+    // เรียก /count แบบ GET (ยังไม่ได้ใช้ uuid ตรงนี้นะ)
+    if (navType !== "reload") {
+      fetch("http://127.0.0.1:5000/count", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify({ uuid }),
       })
         .then((res) => res.json())
         .then((data) => {
           document.getElementById("counter").textContent = data.count;
+        })
+        .catch((err) => {
+          console.error("Count request failed:", err);
+          document.getElementById("counter").textContent = "เกิดข้อผิดพลาด";
         });
     }
+
+    // เปิดเพลงเมื่อคลิก
     window.addEventListener("click", function () {
       const audio = document.getElementById("bg-music");
       if (audio.paused) {
