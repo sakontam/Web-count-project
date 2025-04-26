@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,164 +10,181 @@
         font-family: Arial, sans-serif;
         background-color: #f4f4f9;
         margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        flex-direction: column;
-      }
-
-      .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        width: 100%;
-        height: 100%;
         padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
-
-      .visitor-info {
-        width: 300px;
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-right: 20px;
-        flex-shrink: 0;
-      }
-
       h1 {
-        color: #333;
-        font-size: 2.5em;
         margin-bottom: 20px;
-        text-align: center;
-        width: 100%;
       }
-
       .count-box {
         font-size: 1.5em;
         color: #555;
         background-color: #f0f8ff;
         border: 2px solid #1e90ff;
-        padding: 15px 20px;
+        padding: 15px;
         border-radius: 8px;
-        display: inline-block;
-        margin-top: 20px;
+        margin-bottom: 30px;
         text-align: center;
+        width: 300px;
       }
-
+      .button-group {
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .button-group button {
+        background-color: #1e90ff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .button-group button:hover {
+        background-color: #0d6efd;
+      }
       .chart-container {
-        width: calc(100% - 340px); /* ทำให้กราฟขยายเต็มที่ */
-        height: 100%;
+        width: 1980px;
+        height: 600px;
+        background: white;
+        padding: 20px;
+        justify-items: center;
       }
-
       canvas {
-        width: 100%;
-        height: 100%;
+        width: 1000px !important;
+        height: 600px !important;
       }
     </style>
   </head>
+
   <body>
-    <div class="container">
-      <div class="visitor-info">
-        <h2>จำนวนผู้เข้าชมทั้งหมด</h2>
-        <div id="visitorCount" class="count-box">Loading...</div>
-      </div>
-      <div class="chart-container">
-        <canvas id="visitorChart"></canvas>
-      </div>
+    <h1>แดชบอร์ดผู้เข้าชม</h1>
+
+    <div id="visitorCount" class="count-box">Loading...</div>
+
+    <div class="button-group">
+      <button onclick="showChart('daily')">ผู้เข้าชมรายวัน</button>
+      <button onclick="showChart('device')">ประเภทอุปกรณ์</button>
+      <button onclick="showChart('browser')">เบราว์เซอร์</button>
+      <button onclick="showChart('os')">ระบบปฏิบัติการ</button>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="chart"></canvas>
     </div>
 
     <script>
-      // ดึงข้อมูลจำนวนผู้เข้าชมทั้งหมด
-      fetch("http://127.0.0.1:5000/count", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
+      let chartInstance = null;
+      let chartData = {};
+
+      async function fetchData() {
+        try {
+          // ดึงจำนวนผู้เข้าชม
+          const countRes = await fetch("http://127.0.0.1:5000/count");
+          const countData = await countRes.json();
           document.getElementById(
             "visitorCount"
-          ).textContent = `จำนวนผู้เข้าชม: ${data.count}`;
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-          document.getElementById("visitorCount").textContent =
-            "ไม่สามารถโหลดข้อมูลได้";
-        });
+          ).textContent = `จำนวนผู้เข้าชม: ${countData.count}`;
 
-      // ฟังก์ชันเพื่อดึงข้อมูลจำนวนผู้เข้าชมทั้งหมดจาก API
-      fetch("http://127.0.0.1:5000/visitor_data", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const ctx = document.getElementById("visitorChart").getContext("2d");
+          // ดึงข้อมูลผู้เข้าชมรายวัน
+          const visitorRes = await fetch("http://127.0.0.1:5000/visitor_data");
+          const visitorData = await visitorRes.json();
 
-          // สร้างกราฟ
-          new Chart(ctx, {
+          // ดึงข้อมูล device/browser/os
+          const detailRes = await fetch("http://127.0.0.1:5000/visitor_detail");
+          const detailData = await detailRes.json();
+
+          // เก็บข้อมูลไว้ในตัวแปรกลาง
+          chartData = {
+            daily: {
+              labels: visitorData.dates,
+              data: visitorData.counts,
+            },
+            device: detailData.device,
+            browser: detailData.browser,
+            os: detailData.os,
+          };
+
+          // แสดงกราฟเริ่มต้นเป็นผู้เข้าชมรายวัน
+          showChart("daily");
+        } catch (error) {
+          console.error("เกิดข้อผิดพลาด:", error);
+        }
+      }
+
+      function showChart(type) {
+        const ctx = document.getElementById("chart").getContext("2d");
+
+        // ลบกราฟเก่า
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
+        if (type === "daily") {
+          chartInstance = new Chart(ctx, {
             type: "line",
             data: {
-              labels: data.dates,
+              labels: chartData.daily.labels,
               datasets: [
                 {
-                  label: "จำนวนผู้เข้าชม",
-                  data: data.counts,
+                  label: "จำนวนผู้เข้าชมรายวัน",
+                  data: chartData.daily.data,
                   borderColor: "#1e90ff",
                   backgroundColor: "rgba(30, 144, 255, 0.2)",
-                  fill: true,
-                  tension: 0.4,
                 },
               ],
             },
             options: {
               responsive: true,
-              plugins: {
-                legend: {
-                  position: "top",
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function (tooltipItem) {
-                      return `จำนวนผู้เข้าชม: ${tooltipItem.raw}`;
-                    },
-                  },
-                },
-              },
               scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: "วันที่",
-                  },
-                },
+                x: { title: { display: true, text: "วันที่" } },
                 y: {
-                  title: {
-                    display: true,
-                    text: "จำนวนผู้เข้าชม",
-                  },
+                  beginAtZero: true,
                   ticks: {
-                    // กำหนดให้แสดงตัวเลขที่เป็นค่าตัวเลขธรรมดา
-                    beginAtZero: true, // เริ่มจาก 0
-                    stepSize: 1, // กำหนดระยะห่างระหว่างตัวเลขในแกน Y
+                    stepSize: 1, // บังคับทีละ 1
                     callback: function (value) {
-                      return value; // แสดงผลตัวเลขธรรมดา
+                      if (Number.isInteger(value)) {
+                        return value; // แสดงเฉพาะจำนวนเต็ม
+                      }
                     },
                   },
                 },
               },
             },
           });
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
+        } else {
+          // สำหรับ pie chart
+          chartInstance = new Chart(ctx, {
+            type: "pie",
+            data: {
+              labels: Object.keys(chartData[type]),
+              datasets: [
+                {
+                  data: Object.values(chartData[type]),
+                  backgroundColor: [
+                    "#4caf50",
+                    "#ff9800",
+                    "#2196f3",
+                    "#9c27b0",
+                    "#00bcd4",
+                    "#ffc107",
+                  ],
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+            },
+          });
+        }
+      }
+
+      fetchData();
     </script>
   </body>
 </html>

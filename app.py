@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from flask_cors import CORS
 import pytz
+import user_agents
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -20,7 +21,10 @@ def init_db():
             CREATE TABLE IF NOT EXISTS visitors (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 uuid TEXT UNIQUE,
-                createdate DATE
+                createdate TEXT,
+                device TEXT,
+                browser TEXT,
+                os TEXT
             )
         ''')
 
@@ -41,19 +45,29 @@ def count():
     if not uuid:
         return jsonify({"error": "UUID is required"}), 400
 
+    user_agent_string = request.headers.get('User-Agent', '')
+    ua = user_agents.parse(user_agent_string)
+
+    device_type = "Mobile" if ua.is_mobile else "Tablet" if ua.is_tablet else "PC"
+    browser = ua.browser.family
+    os_name = ua.os.family
+
+    now = datetime.now(pytz.timezone("Asia/Bangkok")).isoformat()
+
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
 
-        # ตรวจสอบว่า UUID นี้เคยมีอยู่ใน DB หรือยัง
         cursor.execute("SELECT id FROM visitors WHERE uuid = ?", (uuid,))
         result = cursor.fetchone()
 
         if not result:
-            now = datetime.now(pytz.timezone("Asia/Bangkok")).isoformat()
-            cursor.execute("INSERT INTO visitors (uuid, createdate) VALUES (?, ?)", (uuid, now))
+            # ถ้าไม่เคยเข้าเลย -> insert record ใหม่
+            cursor.execute('''
+                INSERT INTO visitors (uuid, createdate, device, browser, os)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (uuid, now, device_type, browser, os_name))
             conn.commit()
 
-        # ดึงจำนวนผู้เข้าชมทั้งหมด (จำนวนแถวในตาราง visitors)
         cursor.execute("SELECT COUNT(*) FROM visitors")
         total_visitors = cursor.fetchone()[0]
 
@@ -63,8 +77,6 @@ def count():
 def get_count():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
-
-        # ดึงจำนวนผู้เข้าชมทั้งหมด (จำนวนแถวในตาราง visitors)
         cursor.execute("SELECT COUNT(*) FROM visitors")
         total_visitors = cursor.fetchone()[0]
 
@@ -75,21 +87,41 @@ def visitor_data():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
 
-        # ดึงข้อมูลจำนวนผู้เข้าชมตามวันที่
         cursor.execute('''
             SELECT strftime("%Y-%m-%d", createdate) AS date, COUNT(*) 
             FROM visitors
             GROUP BY date
-            ORDER BY date DESC
+            ORDER BY date ASC
         ''')
         data = cursor.fetchall()
 
-    # เตรียมข้อมูลในรูปแบบที่ Chart.js ต้องการ
     dates = [item[0] for item in data]
     counts = [item[1] for item in data]
     
     return jsonify({"dates": dates, "counts": counts})
 
+@app.route('/visitor_detail', methods=['GET'])
+def visitor_detail():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+
+        # Device
+        cursor.execute('SELECT device, COUNT(*) FROM visitors GROUP BY device')
+        device_data = dict(cursor.fetchall())
+
+        # Browser
+        cursor.execute('SELECT browser, COUNT(*) FROM visitors GROUP BY browser')
+        browser_data = dict(cursor.fetchall())
+
+        # OS
+        cursor.execute('SELECT os, COUNT(*) FROM visitors GROUP BY os')
+        os_data = dict(cursor.fetchall())
+
+    return jsonify({
+        "device": device_data,
+        "browser": browser_data,
+        "os": os_data
+    })
 
 if __name__ == '__main__':
     if not os.path.exists(DB_FILE):
