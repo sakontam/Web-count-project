@@ -85,18 +85,18 @@
       async function fetchData() {
         try {
           // ดึงจำนวนผู้เข้าชม
-          const countRes = await fetch("http://127.0.0.1:5000/count");
+          const countRes = await fetch("https://web-count-project.onrender.com/count");
           const countData = await countRes.json();
           document.getElementById(
             "visitorCount"
           ).textContent = `จำนวนผู้เข้าชม: ${countData.count}`;
 
           // ดึงข้อมูลผู้เข้าชมรายวัน
-          const visitorRes = await fetch("http://127.0.0.1:5000/visitor_data");
+          const visitorRes = await fetch("https://web-count-project.onrender.com/visitor_data");
           const visitorData = await visitorRes.json();
 
           // ดึงข้อมูล device/browser/os
-          const detailRes = await fetch("http://127.0.0.1:5000/visitor_detail");
+          const detailRes = await fetch("https://web-count-project.onrender.com/visitor_detail");
           const detailData = await detailRes.json();
 
           // เก็บข้อมูลไว้ในตัวแปรกลาง

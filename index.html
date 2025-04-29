@@ -81,7 +81,7 @@
 
     // เรียก /count แบบ GET (ยังไม่ได้ใช้ uuid ตรงนี้นะ)
     if (navType !== "reload") {
-      fetch("http://127.0.0.1:5000/count", {
+      fetch("https://web-count-project.onrender.com/count", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
