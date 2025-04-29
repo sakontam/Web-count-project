@@ -3,3 +3,4 @@ Werkzeug==2.0.3
 flask-cors==3.0.10
 gunicorn
 pytz
+user_agents
